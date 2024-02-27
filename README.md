@@ -1,0 +1,2 @@
+# wordleSolver
+ai project
