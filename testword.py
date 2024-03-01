@@ -44,14 +44,32 @@ def heuristic(word, target_word, yellow_letters, green_letters):
     return incorrect_letters + incorrect_letters_in_target
 
 
-def a_star(trie, target_word, yellow_letters, green_letters, gray_letters):
-    open_set = [(0, "", "")]  
+def get_user_feedback():
+    while True:
+        feedback = input("Was the result green (g), yellow (y), gray (r), or 100% sure (s)? ").strip().lower()
+        if feedback in ['g', 'y', 'r', 's']:
+            return feedback
+        else:
+            print("Invalid input. Please enter 'g' for green, 'y' for yellow, 'r' for gray, or 's' for 100% sure.")
+
+
+def update_common_letter(yellow_letters, green_letters, gray_letters, word_list):
+    all_letters = [letter for word in word_list for letter in word if letter not in gray_letters]
+    if all_letters:
+        return max(all_letters, key=all_letters.count)
+    return None
+
+
+
+
+def a_star(trie, target_word, yellow_letters, green_letters, gray_letters, first_guess=None):
+    open_set = [(0, first_guess if first_guess else "", "")]
     closed_set = set()
 
     while open_set:
         _, current_word, _ = heapq.heappop(open_set)
 
-        if current_word == target_word:
+        if all(letter in green_letters for letter in target_word):
             return current_word
 
         if current_word in closed_set:
@@ -59,24 +77,58 @@ def a_star(trie, target_word, yellow_letters, green_letters, gray_letters):
 
         closed_set.add(current_word)
 
-        for letter in 'abcdefghijklmnopqrstuvwxyz':
-            neighbor_word = current_word + letter
-            if trie.starts_with(neighbor_word):
-                h = heuristic(neighbor_word, target_word, yellow_letters, green_letters)
-                heapq.heappush(open_set, (h, neighbor_word, current_word))
+        feedback = None
+        if len(current_word) == 1:  # Ask for feedback after the first guess
+            feedback = get_user_feedback()
+            if feedback == 's':
+                return current_word
+            elif feedback == 'y':
+                yellow_letters.append(current_word)
+            elif feedback == 'g':
+                green_letters.append(current_word)
+            elif feedback == 'r':
+                gray_letters.append(current_word)
+
+        # Find the most common letter based on the updated lists
+        common_letter = update_common_letter(yellow_letters, green_letters, gray_letters, word_list)
+
+        if feedback is not None and common_letter:
+            print("Next guess should include:", common_letter)  # Output the most common letter for the next guess
+
+        if feedback not in ['y', 'g']:  # Proceed only if feedback is not yellow or green
+            if common_letter:
+                for letter in 'abcdefghijklmnopqrstuvwxyz':
+                    neighbor_word = current_word + letter
+                    if trie.starts_with(neighbor_word):
+                        h = heuristic(neighbor_word, target_word, yellow_letters, green_letters)
+                        heapq.heappush(open_set, (h, neighbor_word, current_word))
+            else:
+                for letter in 'abcdefghijklmnopqrstuvwxyz':
+                    neighbor_word = current_word + letter
+                    if trie.starts_with(neighbor_word):
+                        h = heuristic(neighbor_word, target_word, yellow_letters, green_letters)
+                        heapq.heappush(open_set, (h, neighbor_word, current_word))
 
     return None
 
 
+
+
+
+
+
 word_list = ["apple", "banana", "cherry", "grape", "lemon", "orange"]
-target_word = "apple"
-yellow_letters = ['p', 'l']
-green_letters = ['a']
+yellow_letters = []
+green_letters = []
 gray_letters = []
 
 trie = Trie()
 for word in word_list:
     trie.insert(word)
 
-solution = a_star(trie, target_word, yellow_letters, green_letters, gray_letters)
-print("Solution:", solution)
+first_guess = input("Enter your first guess: ").strip().lower()
+solution = a_star(trie, first_guess, yellow_letters, green_letters, gray_letters)
+if solution:
+    print("Solution:", solution)
+else:
+    print("No solution found.")
