@@ -1,134 +1,133 @@
-import heapq
+import string
+import random
+from collections import defaultdict
+
+with open("dictionary.txt", "r") as file:
+    words = file.readlines()
+
+# Computes probability for all letters and returns words which contain them.
+def rebalance(probs={}, numPasses=0):
+    if probs:
+        for key, val in probs.items():
+            letterProbabilites[key] = val
+
+    totalLetters = sum(letterProbabilites.values())
+    for key in letterProbabilites.keys():
+        letterProbabilites[key] = letterProbabilites[key] / totalLetters
 
 
-class TrieNode:
-    def __init__(self):
-        self.children = {}
-        self.is_end_of_word = False
+    mostProbableKeys = sorted(letterProbabilites, key=letterProbabilites.get, reverse=True)
+    if numPasses == 0:
+        topKeys = frozenset(mostProbableKeys[:15])
+    else:
+        topKeys = frozenset(mostProbableKeys[:15+numPasses])
 
-class Trie:
-    def __init__(self):
-        self.root = TrieNode()
-
-    def insert(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                node.children[char] = TrieNode()
-            node = node.children[char]
-        node.is_end_of_word = True
-
-    def search(self, word):
-        node = self.root
-        for char in word:
-            if char not in node.children:
-                return False
-            node = node.children[char]
-        return node.is_end_of_word
-
-    def starts_with(self, prefix):
-        node = self.root
-        for char in prefix:
-            if char not in node.children:
-                return False
-            node = node.children[char]
-        return True
-
-
-def heuristic(word, target_word, yellow_letters, green_letters):
-    yellow_count = sum(1 for letter in word if letter in yellow_letters)
-    green_count = sum(1 for letter in word if letter in green_letters)
-    total_match = yellow_count + green_count
-    incorrect_letters = len(word) - total_match
-    incorrect_letters_in_target = sum(1 for letter in target_word if letter not in word)
-    return incorrect_letters + incorrect_letters_in_target
-
-
-def get_user_feedback():
-    while True:
-        feedback = input("Was the result green (g), yellow (y), gray (r), or 100% sure (s)? ").strip().lower()
-        if feedback in ['g', 'y', 'r', 's']:
-            return feedback
+    wordList = []
+    for letter in mostProbableKeys:
+        for word in wordsAsLetters.keys():
+            if word.issubset(topKeys):
+                mostProbableWord = wordsAsLetters[word]
+                wordList.extend(mostProbableWord)
+        if len(wordList) != 0:
+            break
         else:
-            print("Invalid input. Please enter 'g' for green, 'y' for yellow, 'r' for gray, or 's' for 100% sure.")
+            topKeys.add(letter)
 
+    return wordList
 
-def update_common_letter(yellow_letters, green_letters, gray_letters, word_list):
-    all_letters = [letter for word in word_list for letter in word if letter not in gray_letters]
-    if all_letters:
-        return max(all_letters, key=all_letters.count)
-    return None
-
-
-
-
-def a_star(trie, target_word, yellow_letters, green_letters, gray_letters, first_guess=None):
-    open_set = [(0, first_guess if first_guess else "", "")]
-    closed_set = set()
-
-    while open_set:
-        _, current_word, _ = heapq.heappop(open_set)
-
-        if all(letter in green_letters for letter in target_word):
-            return current_word
-
-        if current_word in closed_set:
-            continue
-
-        closed_set.add(current_word)
-
-        feedback = None
-        if len(current_word) == 1:  # Ask for feedback after the first guess
-            feedback = get_user_feedback()
-            if feedback == 's':
-                return current_word
-            elif feedback == 'y':
-                yellow_letters.append(current_word)
-            elif feedback == 'g':
-                green_letters.append(current_word)
-            elif feedback == 'r':
-                gray_letters.append(current_word)
-
-        # Find the most common letter based on the updated lists
-        common_letter = update_common_letter(yellow_letters, green_letters, gray_letters, word_list)
-
-        if feedback is not None and common_letter:
-            print("Next guess should include:", common_letter)  # Output the most common letter for the next guess
-
-        if feedback not in ['y', 'g']:  # Proceed only if feedback is not yellow or green
-            if common_letter:
-                for letter in 'abcdefghijklmnopqrstuvwxyz':
-                    neighbor_word = current_word + letter
-                    if trie.starts_with(neighbor_word):
-                        h = heuristic(neighbor_word, target_word, yellow_letters, green_letters)
-                        heapq.heappush(open_set, (h, neighbor_word, current_word))
+def validateWord(word, wordList, numPasses=0):
+    validatedWordList = []
+    
+    # Record letters that can't be at given index.
+    for ind, letter in enumerate(list(word)):
+        if letter.islower():
+            lettersNotAtInd[ind].append(letter)
+            
+    for w in wordList:
+        badWord = False
+        
+        # Makes sure the words contain all the known (yellow) letters
+        for letter in lettersInWord:
+            if letter not in w:
+                badWord = True
+                
+        # Remove word if letters are not correct position 
+        for ind, letter in enumerate(list(word)):
+            if letter.isupper() and w[ind] != letter.lower():
+                badWord = True
+            elif letter.islower() and w[ind] in lettersNotAtInd[ind]:
+                badWord = True
             else:
-                for letter in 'abcdefghijklmnopqrstuvwxyz':
-                    neighbor_word = current_word + letter
-                    if trie.starts_with(neighbor_word):
-                        h = heuristic(neighbor_word, target_word, yellow_letters, green_letters)
-                        heapq.heappush(open_set, (h, neighbor_word, current_word))
-
-    return None
-
-
-
-
+                pass
+            
+        if not badWord:
+            validatedWordList.append(w)
+    
+    # If no words are found, increment counter
+    if len(validatedWordList) == 0:
+        numPasses += 1
+    return numPasses, validatedWordList
 
 
+def getMoreWords(history, prevList, numPasses=0):
+    numPasses += 1
+    wordList = rebalance(numPasses=numPasses)
+    numPasses, validatedList = validateWord(history[-1], wordList)
+    while len(validatedList) == 0 or prevList == validatedList:
+        numPasses += 1
+        wordList = rebalance(probs, numPasses)
+        numPasses, validatedList = validateWord(history[-1], wordList, numPasses)
 
-word_list = ["apple", "banana", "cherry", "grape", "lemon", "orange"]
-yellow_letters = []
-green_letters = []
-gray_letters = []
+    return numPasses, validatedList
 
-trie = Trie()
-for word in word_list:
-    trie.insert(word)
+letterProbabilites = {key: 0 for key in list(string.ascii_lowercase)}
+lettersNotAtInd = d = [[] for x in range(5)]
+lettersInWord = set([])
+wordsAsLetters = defaultdict(list)
 
-first_guess = input("Enter your first guess: ").strip().lower()
-solution = a_star(trie, first_guess, yellow_letters, green_letters, gray_letters)
-if solution:
-    print("Solution:", solution)
-else:
-    print("No solution found.")
+fiveLetterWords = [word.strip('\n') for word in words if len(word) == 6]
+for word in fiveLetterWords:
+    wordsAsLetters[frozenset(word)].append(word)
+    for letter in list(word):
+        letterProbabilites[letter] += 1
+
+wordList = rebalance()
+history = []
+numPasses = 0
+
+while(True):
+    word = list(input("Whats the result? Lowercase if wrong position, Uppercase if correct, Underscore if unknown. "
+                      "If no words, hit enter and if finished, type done.\n"))
+    if not word:
+        numPasses, validatedList = getMoreWords(history, validatedList, numPasses)
+        continue
+    elif word == list("done"):
+        exit()
+    else:
+        pass
+
+    history.append(word)
+
+    wrongLetters = list(input("Wrong Letters?\n"))
+
+    probs = {}
+
+    for letter in word:
+        if letter == "_":
+            pass
+        else:
+            lettersInWord.add(letter.lower())
+            probs[letter.lower()] = 10
+
+    for letter in wrongLetters:
+        probs[letter] = 0
+
+    numPasses = 0
+    wordList = rebalance(probs, numPasses)
+    numPasses, validatedList = validateWord(word, wordList)
+    while len(validatedList) == 0:
+        wordList = rebalance(probs, numPasses)
+        numPasses, validatedList = validateWord(word, wordList, numPasses)
+    random.shuffle(validatedList)
+
+    print("Possible words:", sorted(validatedList, key=lambda x: len(set(x)), reverse=True), "\n")
