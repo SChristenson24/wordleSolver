@@ -101,38 +101,47 @@ def get_user_input():
     present = {}  # {letter: [positions]}
     absent = set()  # Set of letters not in the word
 
-    # Correct letters input
-    correct_input = input(
-        "Enter correct letters with their positions (e.g., 1a 3c), or type 'solved' to end: "
-    )
-    if correct_input.lower() == "solved":
-        return "solved", {}, []  # Early exit if solved
+    while True:
+        try:
+            # Correct letters input
+            correct_input = input(
+                "Enter correct letters with their positions (e.g., 1a 3c), or type 'solved' to end: "
+            )
+            if correct_input.lower() == "solved":
+                return "solved", {}, []  # Early exit if solved
 
-    for entry in correct_input.split():
-        if len(entry) == 2:
-            position, letter = (
-                int(entry[0]) - 1,
-                entry[1],
-            )  # Adjust for zero-based indexing
-            correct[position] = letter
+            for entry in correct_input.split():
+                if len(entry) == 2:
+                    position, letter = (
+                        int(entry[0]) - 1,
+                        entry[1],
+                    )  # Adjust for zero-based indexing
+                    correct[position] = letter
+            break  # Exit the loop if input is successfully parsed
+        except ValueError:
+            print("Invalid input format. Please try again.")
 
-    # Present but incorrectly positioned letters input
-    present_input = input(
-        "Enter letters known to be in the word with wrong positions (e.g., 1r for 'r' not in position 1): "
-    )
-    for entry in present_input.split():
-        if len(entry) > 1:
-            position, letter = int(entry[0]) - 1, entry[1:]
-            if letter not in present:
-                present[letter] = []
-            present[letter].append(position)  # Append incorrect position for the letter
+    while True:
+        try:
+            # Present but incorrectly positioned letters input
+            present_input = input(
+                "Enter letters known to be in the word with wrong positions (e.g., 1r for 'r' not in position 1): "
+            )
+            for entry in present_input.split():
+                if len(entry) > 1:
+                    position, letter = int(entry[0]) - 1, entry[1:]
+                    if letter not in present:
+                        present[letter] = []
+                    present[letter].append(position)  # Append incorrect position for the letter
+            break  # Exit the loop if input is successfully parsed
+        except ValueError:
+            print("Invalid input format. Please try again.")
 
     # Absent letters input
     absent_input = input("Enter letters known not to be in the word: ")
-    absent = list(absent_input.replace(" ", ""))
+    absent = set(absent_input.replace(" ", ""))
 
     return correct, present, absent
-
 
 def update_user_input(correct_positions, incorrect_positions, absent_letters):
     print("\nCurrent guess state:")
