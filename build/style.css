@@ -33,10 +33,15 @@ button {
     border: none;  
     border-radius: 3px;  
     cursor: pointer; 
+    font-weight: 700;
 }
 
-button:hover {
+.Update:hover {
     background-color: rgb(123, 191, 124); 
+}
+
+.Clear:hover {
+    background-color: rgb(203, 107, 107); 
 }
 
 input {
