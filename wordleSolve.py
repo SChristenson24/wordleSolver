@@ -1,6 +1,4 @@
 from collections import deque
-from flask import Flask, request, jsonify
-app = Flask(__name__)
 
 #Dictionary from https://gist.github.com/shmookey/b28e342e1b1756c4700f42f17102c2ff
 
@@ -121,28 +119,5 @@ def main():
             print("Exiting...")
             break
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        # Assuming you're sending data to this endpoint, you would process it here.
-        # For demonstration, let's say you want to search for words based on some criteria.
-        data = request.json
-        correct, present, absent = data.get('correct', {}), data.get('present', {}), data.get('absent', set())
-
-        # Initialize your Trie and populate it (you might want to do this outside the request handling to avoid reloading it on each request)
-        trie = Trie()
-        dictionary_path = "your_dictionary_file_path_here.txt"
-        populate_trie(trie, dictionary_path)
-
-        # Perform search based on input
-        valid_words = bfs_search(trie, correct, present, absent)
-
-        # Return the valid words as a JSON response
-        return jsonify(valid_words=valid_words)
-    else:
-        # For GET requests, just return a simple message or form
-        return 'Welcome to the Trie-based word search! Send a POST request with correct, present, and absent data.'
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
+if __name__ == "__main__":
+    main()
