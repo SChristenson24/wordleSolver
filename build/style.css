@@ -1,3 +1,8 @@
+body {
+    background-color: #1f1f1f;
+    color: white;
+}
+
 h1 {
     text-align: center;
 }
@@ -5,11 +10,21 @@ h1 {
 h3 {
     text-align: center;
 }
+
 .center {
     margin-left: auto;
     margin-right: auto;
 }
-input{
+
+.buttons {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+input {
     width:50px;
     height:50px;
-    text-align:center;}
+    text-align:center;
+    background-color: #3f3e3e;
+    border-color: transparent;
+}
