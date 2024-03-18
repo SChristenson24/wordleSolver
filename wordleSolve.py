@@ -1,5 +1,6 @@
 from collections import deque
 
+#Dictionary from https://gist.github.com/shmookey/b28e342e1b1756c4700f42f17102c2ff
 
 class TrieNode:
     def __init__(self):
