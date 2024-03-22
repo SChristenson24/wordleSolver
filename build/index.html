@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wordle Solver</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.maxlength.css" rel="stylesheet"/>
     <link
     rel="stylesheet"
@@ -24,44 +25,62 @@
         SOLVER
     </h1>
 
-    <h3>Green letters</h3>
-    <table class="center">
-        <tr>
-           <td>
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-           </td>
-         </tr>
-     </table>
+    <div id="wordleGrid" class="center">
+      <!-- Each row represents an attempt; you can start with one and dynamically add more with JS -->
+      <div class="wordleRow">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+      </div>
+  </div>  
+  
+    <div id="wordleGrid" class="center">
+      <!-- Each row represents an attempt; you can start with one and dynamically add more with JS -->
+      <div class="wordleRow">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+      </div>
+  </div>
 
-     <h3>Yellow letters</h3>
-     <table class="center">
-         <tr>
-            <td>
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-            </td>
-          </tr>
-      </table>
+    <div id="wordleGrid" class="center">
+      <!-- Each row represents an attempt; you can start with one and dynamically add more with JS -->
+      <div class="wordleRow">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+      </div>
+    </div>
 
-      <h3>Gray letters</h3>
-      <table class="center">
-          <tr>
-             <td>
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-             </td>
-           </tr>
-       </table>
+    <div id="wordleGrid" class="center">
+      <!-- Each row represents an attempt; you can start with one and dynamically add more with JS -->
+      <div class="wordleRow">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+          <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+      </div>
+  </div>
+
+  <div id="wordleGrid" class="center">
+    <!-- Each row represents an attempt; you can start with one and dynamically add more with JS -->
+    <div class="wordleRow">
+        <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+        <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+        <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+        <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+        <input type="text" maxlength="1" class="wordleCell" oninput="autoTab(this)">
+    </div>
+  </div>
+  <button class="Update" onclick="submitGuess()">Submit Guess</button>
+
        <h3><div class="buttons">
        <button class="Update" >Update</button><button class="Clear">Clear</button>
        </div></h3>
