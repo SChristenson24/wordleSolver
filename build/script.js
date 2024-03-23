@@ -1,8 +1,11 @@
 function autoTab(currentField) {
+    // Convert input to uppercase and remove non-letter characters
+    currentField.value = currentField.value.toUpperCase().replace(/[^A-Z]/gi, '');
+
     // Move to the next field if the current one is filled
     if (currentField.value.length >= currentField.maxLength) {
         let next = currentField;
-        while (next = next.nextElementSibling) {
+        while ((next = next.nextElementSibling)) {
             if (next.tagName.toLowerCase() === "input") {
                 next.focus();
                 break;
@@ -10,6 +13,7 @@ function autoTab(currentField) {
         }
     }
 }
+
 
 function submitGuess() {
     const activeRow = document.querySelector('.wordleRow.active');
@@ -52,6 +56,35 @@ function submitGuess() {
         }
     });
 });
+
+function clearActiveRow() {
+    const activeRow = document.querySelector('.wordleRow.active');
+    if (activeRow) {
+        const inputs = activeRow.querySelectorAll('.wordleCell');
+        inputs.forEach(input => {
+            input.value = ''; // Clear each input field in the active row
+        });
+        inputs[0].focus(); // Optional: Refocus on the first cell of the active row
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.wordleCell').forEach(input => {
+        input.addEventListener('keydown', handleBackspace);
+    });
+});
+
+function handleBackspace(event) {
+    if (event.key === 'Backspace' && event.target.value === '') {
+        // If backspace is pressed and the current input is empty, move to the previous input
+        const previous = event.target.previousElementSibling;
+        if (previous && previous.classList.contains('wordleCell')) {
+            previous.focus();
+            previous.value = ''; // Optionally clear the previous input as well
+        }
+    }
+}
+
 
   
 

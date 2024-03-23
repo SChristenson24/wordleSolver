@@ -68,6 +68,10 @@ input {
     text-transform: uppercase;
 }
 
+.wordleCell:focus {
+    outline: none;
+}
+
 .wordleRow {
     display: flex;
     justify-content: center;
