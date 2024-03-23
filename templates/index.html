@@ -5,8 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wordle Solver</title>
-    <link rel="stylesheet" href="style.css" />
-    <script src="script.js"></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
   </head>
   <body>
     <h1>
@@ -253,8 +256,8 @@
 
     <h3>
       <div class="buttons">
-        <button class="Update">Submit</button
-        ><button class="Clear" onclick="clearActiveRow()">Clear</button>
+        <button class="Update" onclick="submitGuess()">Submit</button>
+        <button class="Clear" onclick="clearActiveRow()">Clear</button>
       </div>
     </h3>
     <h3>Possible Solutions</h3>
