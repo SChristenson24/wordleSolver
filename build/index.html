@@ -1,70 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wordle Solver</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.maxlength.css" rel="stylesheet"/>
-    <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.maxlength.css"
-  />
-</head>
-<body>
-    <h1>  
-        <font color=#90EE90>W</font>
-        <font color=#fffd8d>O</font>
-        <font color=#D3D3D3>R</font>
-        <font color=#90EE90>D</font>
-        <font color=#fffd8d>L</font>
-        <font color=#D3D3D3>E</font>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <h1>
+      <font color="#90EE90">W</font>
+      <font color="#fffd8d">O</font>
+      <font color="#D3D3D3">R</font>
+      <font color="#90EE90">D</font>
+      <font color="#fffd8d">L</font>
+      <font color="#D3D3D3">E</font>
 
-        SOLVER
+      SOLVER
     </h1>
 
-    <h3>Green letters</h3>
-    <table class="center">
-        <tr>
-           <td>
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-              <input type='text' maxlength="1" style="text-transform:uppercase">
-           </td>
-         </tr>
-     </table>
+    <div id="wordleGrid" class="center">
+      <!-- Each row represents an attempt; you can start with one and dynamically add more with JS -->
+      <div class="wordleRow active">
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+      </div>
 
-     <h3>Yellow letters</h3>
-     <table class="center">
-         <tr>
-            <td>
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-               <input type='text' maxlength="1" style="text-transform:uppercase">
-            </td>
-          </tr>
-      </table>
+      <div class="wordleRow">
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+      </div>
 
-      <h3>Gray letters</h3>
-      <table class="center">
-          <tr>
-             <td>
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-                <input type='text' maxlength="1" style="text-transform:uppercase">
-             </td>
-           </tr>
-       </table>
-       <h3><div class="buttons">
-       <button class="Update" >Update</button><button class="Clear">Clear</button>
-       </div></h3>
-       <h3>Possible Solutions</h3>
-</body>
+      <div class="wordleRow">
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+      </div>
+
+      <div class="wordleRow">
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+      </div>
+
+      <div class="wordleRow">
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+      </div>
+
+      <div class="wordleRow">
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+        <input
+          type="text"
+          maxlength="1"
+          class="wordleCell"
+          oninput="autoTab(this)
+          "
+        />
+      </div>
+    </div>
+
+    <h3>
+      <div class="buttons">
+        <button class="Update">Submit</button
+        ><button class="Clear" onclick="clearActiveRow()">Clear</button>
+      </div>
+    </h3>
+    <h3>Possible Solutions</h3>
+  </body>
 </html>
