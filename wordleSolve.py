@@ -1,6 +1,7 @@
 from collections import deque
 
-#Dictionary from https://gist.github.com/shmookey/b28e342e1b1756c4700f42f17102c2ff
+# Dictionary from https://gist.github.com/shmookey/b28e342e1b1756c4700f42f17102c2ff
+
 
 class TrieNode:
     def __init__(self):
@@ -118,6 +119,7 @@ def main():
         if input("Continue solving? (y/n): ").lower() != "y":
             print("Exiting...")
             break
+
 
 if __name__ == "__main__":
     main()

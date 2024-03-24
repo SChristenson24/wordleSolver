@@ -23,7 +23,8 @@ with open(dictionary_path) as f:
 @app.route("/start_game", methods=["GET"])
 def start_game():
     session["target_word"] = random.choice(valid_words)
-    session["guesses"] = []  # Initialize or reset guesses history
+    session["guesses"] = []
+    session["absent_letters"] = []  # Store as an empty list instead of a set
     return jsonify({"message": "Game started"}), 200
 
 
@@ -70,16 +71,16 @@ def check_guess():
         return jsonify({"error": "Game not started"}), 400
 
     if not guess or guess not in valid_words:
-        # If the guess is not in the dictionary
         return jsonify({"error": "Word does not exist in dictionary"}), 400
 
     solution = session.get("target_word")
     feedback = get_feedback(guess, solution)
     print(f"Feedback: {feedback}")
-    session["guesses"].append((guess, feedback))  # Track guesses and their feedback
+    session["guesses"].append((guess, feedback))
 
-    # Convert feedback into format expected by bfs_search
-    correct, present, absent = {}, {}, set()
+    # Retrieve and update the absent set
+    absent = set(session.get("absent_letters", []))
+    correct, present = {}, {}
     for i, f in enumerate(feedback):
         if f == "green":
             correct[i] = guess[i]
@@ -90,22 +91,22 @@ def check_guess():
         elif f == "gray":
             absent.add(guess[i])
 
-    # Print the feedback processing results for debugging
+    # Store the updated absent set
+    session["absent_letters"] = list(absent)
+
     print("Feedback for guess:", feedback)
     print("Correct:", correct)
     print("Present:", present)
     print("Absent:", absent)
 
-    # Perform BFS search with the current state to find possible solutions
     possible_solutions = bfs_search(trie, correct, present, absent)
     print(f"Possible solutions: {possible_solutions}")
-
-    # Print the possible solutions found for debugging
     print("Possible solutions found:", possible_solutions)
 
     game_over = all(f == "green" for f in feedback)
     if game_over:
-        session.pop("target_word", None)  # Game over
+        session.pop("target_word", None)
+        session.pop("absent_letters", None)  # Also clear the absent letters
         return (
             jsonify(
                 {"feedback": feedback, "game_over": True, "message": "Congratulations!"}
@@ -113,7 +114,6 @@ def check_guess():
             200,
         )
 
-    # Include the possible solutions in the response
     return (
         jsonify(
             {

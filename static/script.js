@@ -61,6 +61,10 @@ function submitGuess() {
         }
     
         applyFeedback(activeRow, data.feedback);
+
+        if (data.feedback) {
+            handleFeedback(data.feedback);
+          }
     
         // Change this line to match the key sent from Flask
         if (Array.isArray(data.possible_solutions)) {
@@ -90,28 +94,35 @@ function displayPossibleSolutions(solutions) {
     if (!solutionsDiv) {
         solutionsDiv = document.createElement('div');
         solutionsDiv.id = 'possibleSolutions';
+        solutionsDiv.style.display = 'flex'; // Set the display to flex for horizontal layout
+        solutionsDiv.style.flexWrap = 'wrap'; // Wrap items to the next line
         solutionsDiv.style.maxHeight = '200px';
         solutionsDiv.style.overflowY = 'scroll';
         solutionsDiv.style.border = '1px solid #ccc';
         solutionsDiv.style.marginTop = '20px';
         solutionsDiv.style.padding = '10px';
-        document.body.appendChild(solutionsDiv); // Append wherever it fits in your layout
+        document.body.appendChild(solutionsDiv);
     }
     solutionsDiv.innerHTML = ''; // Clear previous solutions
 
     if (solutions && solutions.length > 0) {
         solutions.forEach(solution => {
             const solutionDiv = document.createElement('div');
-            solutionDiv.textContent = solution;
+            solutionDiv.textContent = solution.toUpperCase(); // Convert to uppercase
+            solutionDiv.style.background = 'white'; // Set background to white
+            solutionDiv.style.color = 'black'; // Set text color to black
+            solutionDiv.style.fontWeight = 'bold'; // Make text bold
             solutionDiv.style.border = '1px solid #ddd';
             solutionDiv.style.margin = '5px';
             solutionDiv.style.padding = '5px';
+            solutionDiv.style.textAlign = 'center'; // Center text in the div
             solutionsDiv.appendChild(solutionDiv);
         });
     } else {
-        solutionsDiv.innerHTML = '<div>No Possible Solutions!</div>'; // Show message when no solutions
+        solutionsDiv.innerHTML = '<div>No Possible Solutions!</div>';
     }
 }
+
 
 
 function applyFeedback(row, feedback) {
@@ -244,6 +255,53 @@ function showError(message) {
     }, 1500); 
 }
 
-
+document.querySelectorAll('.keyboard-key').forEach(key => {
+    key.addEventListener('click', () => {
+      const letter = key.textContent;
+      addLetterToCurrentInput(letter);
+    });
+  });
+  
+  function addLetterToCurrentInput(letter) {
+    // Find the first input box that is not filled
+    const unfilledInput = document.querySelector('.wordleCell:not([value])');
+    if (unfilledInput) {
+      unfilledInput.value = letter;
+      unfilledInput.dispatchEvent(new Event('input', { bubbles: true }));
+      autoTab(unfilledInput);
+    }
+  }
+  
+  // This function updates the colors of the keyboard keys based on feedback
+  function updateKeyboard(feedback) {
+    feedback.forEach((status, index) => {
+      const letter = status.letter.toUpperCase();
+      const keyElement = document.querySelector(`.keyboard-key[data-key="${letter}"]`);
+      if (keyElement) {
+        keyElement.classList.remove('correct', 'present', 'absent');
+        keyElement.classList.add(status.class);
+      }
+    });
+  }
+  
+  // Call this function after you receive feedback from the server
+  function handleFeedback(feedback) {
+    feedback.forEach((f, index) => {
+      const cell = document.querySelectorAll('.wordleCell')[index];
+      const keyElement = document.querySelector(`.keyboard-key[data-key="${cell.value}"]`);
+      if (keyElement) {
+        // Assign color based on feedback for the key
+        keyElement.classList.remove('correct', 'present', 'absent');
+        if (f === 'green') {
+          keyElement.classList.add('correct');
+        } else if (f === 'yellow') {
+          keyElement.classList.add('present');
+        } else if (f === 'gray') {
+          keyElement.classList.add('absent');
+        }
+      }
+    });
+  }
+  
   
 
