@@ -1,0 +1,163 @@
+body {
+    font-family: sans-serif;
+    background-color: #1f1f1f;
+    color: white;
+}
+
+h1 {
+    text-align: center;
+}
+
+h3 {
+    text-align: center;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+}
+.buttons {
+    margin-left: auto;
+    margin-right: auto; 
+}
+
+button {
+    width: 75px;  
+    padding: 10px;
+    margin-right: 18px;
+    margin-left: 18px;
+    margin-top: 10px;  
+    background-color: #f7f7f7;  
+    color: white;  
+    background-color: rgb(143, 143, 143);
+    border: none;  
+    border-radius: 3px;  
+    cursor: pointer; 
+    font-weight: 700;
+}
+
+.Update:hover {
+    background-color: rgb(123, 191, 124); 
+}
+
+.Clear:hover {
+    background-color: rgb(203, 107, 107); 
+}
+
+input {
+    color: white;
+    font-weight: 800;
+    font-size: 24px;
+    width:50px;
+    height:50px;
+    text-align:center;
+    border-color: transparent;
+    background-color: #3f3e3e;
+}
+
+.wordleCell {
+    color: white;
+    font-weight: 800;
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    margin: 5px;
+    border-color: transparent;
+    background-color: #3f3e3e; 
+    text-transform: uppercase;
+}
+
+.wordleCell:focus {
+    outline: none;
+}
+
+.wordleRow {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+@keyframes shake {
+    0%, 100% {transform: translateX(0);}
+    10%, 30%, 50%, 70%, 90% {transform: translateX(-10px);}
+    20%, 40%, 60%, 80% {transform: translateX(10px);}
+  }
+  
+  .shake {
+    animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  
+  #keyboard-container {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: flex-end;
+    padding: 20px 0; 
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center; 
+    margin: 5px 0; 
+}
+
+.keyboard-key {
+    background-color: #ddd;
+    border: none;
+    padding: 10px;
+    margin: 0 5px; 
+    border-radius: 4px;
+    text-transform: uppercase;
+    cursor: pointer; 
+}
+
+.keyboard-key.correct { background-color: #6aaa64; }
+.keyboard-key.present { background-color: #c9b458; }
+.keyboard-key.absent { background-color: #787c7e; }
+
+#win-message {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#win-message.active { display: block; }
+
+#confetti-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+
+::-webkit-scrollbar {
+    width: 10px;
+    background-color: #3f3e3e;
+}
+
+
+::-webkit-scrollbar-thumb {
+    background-color: #9f9fa0a1; 
+    border-radius: 10px;       
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #a0a0b3; 
+}
+
+
