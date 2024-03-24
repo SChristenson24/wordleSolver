@@ -28,7 +28,6 @@ function autoTab(currentField) {
 
 
 function submitGuess() {
-    // Collect the guess
     const activeRow = document.querySelector('.wordleRow.active');
     const guess = Array.from(activeRow.querySelectorAll('.wordleCell'))
                        .map(cell => cell.value.trim().toUpperCase())
@@ -39,72 +38,93 @@ function submitGuess() {
         return;
     }
 
-    // Example data structure, adjust according to your actual logic
-    const data = {
-        guess: guess, // Adjusted to send the guess directly
-        // Add more data if needed
-    };
+    const data = { guess: guess };
 
-    // Send the guess to the server
     fetch('/check_guess', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw response;
         }
         return response.json();
     })
-    .then(feedback => {
-        // Apply color feedback to each cell
-        feedback.forEach((status, index) => {
-            const cell = activeRow.querySelectorAll('.wordleCell')[index];
-            let color;
-            switch (status) {
-                case 'green':
-                    color = '#6aaa64'; // Example color for correct letters
-                    break;
-                case 'yellow':
-                    color = '#c9b458'; // Example color for present but wrong position letters
-                    break;
-                case 'gray':
-                default:
-                    color = '#787c7e'; // Example color for absent letters
-            }
-            cell.style.backgroundColor = color;
-            cell.style.color = 'white'; // Example, adjust as needed
-        });
+    .then(data => {
+        if (data.error) {
+            showError(data.error);
+            shakeRow(activeRow);
+            return;
+        }
 
-        // Prepare for the next guess
-        moveToNextRow();
+        applyFeedback(activeRow, data.feedback);
+        if (data.game_over) {
+            alert(data.message || "Game Over!");
+            // Handle game over scenario
+        } else {
+            moveToNextRow();
+        }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(errorResponse => {
+        errorResponse.json().then(err => {
+            console.error('Error:', err);
+            showError(err.error);
+            shakeRow(activeRow);
+        });
+    });
+}
+
+function applyFeedback(row, feedback) {
+    feedback.forEach((status, index) => {
+        const cell = row.querySelectorAll('.wordleCell')[index];
+        switch (status) {
+            case 'green':
+                cell.style.backgroundColor = '#6aaa64';
+                break;
+            case 'yellow':
+                cell.style.backgroundColor = '#c9b458';
+                break;
+            case 'gray':
+            default:
+                cell.style.backgroundColor = '#787c7e';
+        }
+    });
+}
+
+function shakeRow(row) {
+    row.classList.add('shake');
+    setTimeout(() => { row.classList.remove('shake'); }, 820); // Match CSS animation duration
+}
+
+function showError(message) {
+    const errorDiv = document.createElement("div");
+    errorDiv.textContent = message;
+    errorDiv.style.color = "red";
+    errorDiv.style.position = "fixed";
+    errorDiv.style.bottom = "20px";
+    errorDiv.style.left = "50%";
+    errorDiv.style.transform = "translateX(-50%)";
+    document.body.appendChild(errorDiv);
+
+    setTimeout(() => {
+        document.body.removeChild(errorDiv);
+    }, 2000); // Message disappears after 2 seconds
 }
 
 function moveToNextRow() {
     const activeRow = document.querySelector('.wordleRow.active');
     activeRow.classList.remove('active');
-    activeRow.setAttribute('readonly', true); // Prevent further typing in the current row
-
     const nextRow = activeRow.nextElementSibling;
     if (nextRow) {
-      nextRow.classList.add('active');
-      Array.from(nextRow.querySelectorAll('.wordleCell')).forEach(cell => {
-        cell.removeAttribute('readonly');
-        cell.value = ''; // Clear the cell for the new guess
-      });
-      nextRow.querySelectorAll('.wordleCell')[0].focus(); // Focus the first cell of the next row
-    } else {
-        // Handle end of game, such as displaying a message or disabling input
-        alert("End of game!");
+        nextRow.classList.add('active');
+        Array.from(nextRow.querySelectorAll('.wordleCell')).forEach(cell => {
+            cell.value = '';
+            cell.removeAttribute('readonly');
+        });
+        nextRow.querySelectorAll('.wordleCell')[0].focus();
     }
 }
-
-
 
   document.addEventListener('DOMContentLoaded', function() {
     // Deactivate all rows except the first one upon loading the page.
@@ -158,6 +178,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function showError(message) {
+    const errorDiv = document.createElement("div");
+    errorDiv.textContent = message;
+    errorDiv.style.color = "black";
+    errorDiv.style.position = "fixed";
+    errorDiv.style.top = "20px";
+    errorDiv.style.left = "50%";
+    errorDiv.style.transform = "translateX(-50%)";
+    errorDiv.style.backgroundColor = "white";
+    errorDiv.style.padding = "10px";
+    errorDiv.style.opacity = "1";
+    errorDiv.style.transition = "opacity 0.5s ease"; 
+    document.body.appendChild(errorDiv);
+
+    setTimeout(() => {
+        errorDiv.style.opacity = "0";
+    }, 1000);
+    document.body.appendChild(errorDiv);
+
+    setTimeout(() => {
+        if (document.body.contains(errorDiv)) {
+            document.body.removeChild(errorDiv);
+        }
+    }, 1500); 
+}
 
 
   

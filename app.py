@@ -31,23 +31,27 @@ def start_game():
 def check_guess():
     data = request.json
     guess = data.get("guess", "").lower()
+
     if "target_word" not in session:
         return jsonify({"error": "Game not started"}), 400
-    if not guess:
-        return jsonify({"error": "No guess provided"}), 400
+    if not guess or guess not in valid_words:
+        # If the guess is not in the dictionary
+        return jsonify({"error": "Word does not exist in dictionary"}), 400
 
     solution = session.get("target_word")
-    if not solution:
-        # This should not happen if the game is properly started
-        return jsonify({"error": "Solution not found"}), 500
-
     feedback = get_feedback(guess, solution)
-    if feedback is None:
-        # Safeguard in case feedback calculation fails
-        return jsonify({"error": "Feedback generation failed"}), 500
 
-    # Return the feedback as a valid response
-    return jsonify(feedback), 200
+    # Check if the game has been won
+    if all(f == "green" for f in feedback):
+        session.pop(
+            "target_word", None
+        )  # Remove the target word, effectively ending the game
+        return (
+            jsonify(feedback=feedback, game_over=True, message="Congratulations!"),
+            200,
+        )
+
+    return jsonify(feedback=feedback, game_over=False), 200
 
 
 def get_feedback(guess, solution):
