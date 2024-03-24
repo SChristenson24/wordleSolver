@@ -160,4 +160,23 @@ input {
     background-color: #a0a0b3; 
 }
 
+#win-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    display: none; /* initially hidden */
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+#win-message.active {
+    display: block;
+}
+
+  
 

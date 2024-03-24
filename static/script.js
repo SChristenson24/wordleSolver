@@ -5,6 +5,65 @@ function startGame() {
     .catch(error => console.error('Error starting game:', error));
 }
 
+function startNewGame() {
+    // Call the server to start a new game session
+    fetch('/start_game', {
+        method: 'GET' // Or 'POST' if your endpoint requires it
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to start a new game');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data.message); // Log the server's response
+        resetBoard(); // Reset the game board on the client side
+    })
+    .catch(error => {
+        console.error('Error starting new game:', error);
+    });
+}
+
+function resetBoard() {
+    // Reset the input fields
+    document.querySelectorAll('.wordleRow .wordleCell').forEach(cell => {
+        cell.value = '';
+        cell.style.backgroundColor = ''; // Reset cell background color to default
+    });
+
+    // Reset the keyboard state
+    document.querySelectorAll('.keyboard-key').forEach(key => {
+        key.classList.remove('correct', 'present', 'absent');
+    });
+
+    // Hide the game over message
+    const winMessageDiv = document.getElementById('win-message');
+    if (winMessageDiv.classList.contains('active')) {
+        winMessageDiv.classList.remove('active');
+    }
+
+    // Optionally, if you have a solutions display, clear it as well
+    const solutionsDiv = document.getElementById('possibleSolutions');
+    if (solutionsDiv) {
+        solutionsDiv.innerHTML = '';
+    }
+
+    // Make sure the first row is active and others are reset if necessary
+    const wordleRows = document.querySelectorAll('.wordleRow');
+    wordleRows.forEach((row, index) => {
+        if (index === 0) {
+            row.classList.add('active');
+        } else {
+            row.classList.remove('active');
+        }
+        row.querySelectorAll('.wordleCell').forEach(cell => cell.removeAttribute('readonly'));
+    });
+
+    // Optionally, focus on the first cell of the first row
+    wordleRows[0].querySelector('.wordleCell').focus();
+}
+
 // Call startGame() when the page loads or based on user action
 document.addEventListener('DOMContentLoaded', startGame);
 
@@ -75,7 +134,9 @@ function submitGuess() {
         }
     
         if (data.game_over) {
-            alert(data.message || "Game Over!");
+            // Assume a win if all feedback elements are 'green'
+            const isWin = data.feedback.every(f => f === 'green');
+            handleGameOver(isWin, data.target_word);
         } else {
             moveToNextRow();
         }
@@ -86,6 +147,28 @@ function submitGuess() {
         showError(error.toString());
         shakeRow(activeRow);
     });
+}
+
+function handleGameOver(isWin, targetWord) {
+    const winMessageDiv = document.getElementById('win-message');
+    document.getElementById('target-word-display').textContent = isWin ? 
+        `Congratulations! The target word was: ${targetWord}.` : 
+        `Try again! The target word was: ${targetWord}.`;
+
+    // Show confetti for a win
+    if (isWin) {
+        confetti();
+    }
+
+    // Adjust button text and action based on game outcome
+    const newGameButton = document.getElementById('new-game-button');
+    newGameButton.textContent = "New Game";
+    newGameButton.onclick = () => {
+        winMessageDiv.classList.remove('active');
+        startNewGame(); // A new function to properly reinitialize everything
+    };
+
+    winMessageDiv.classList.add('active');
 }
 
 function displayPossibleSolutions(solutions) {
@@ -306,5 +389,7 @@ document.querySelectorAll('.keyboard-key').forEach(key => {
     });
   }
   
+
+
   
 
