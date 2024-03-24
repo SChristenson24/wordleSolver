@@ -94,28 +94,31 @@ function displayPossibleSolutions(solutions) {
     if (!solutionsDiv) {
         solutionsDiv = document.createElement('div');
         solutionsDiv.id = 'possibleSolutions';
-        solutionsDiv.style.display = 'flex'; // Set the display to flex for horizontal layout
-        solutionsDiv.style.flexWrap = 'wrap'; // Wrap items to the next line
+        solutionsDiv.style.display = 'flex';
+        solutionsDiv.style.flexWrap = 'wrap';
         solutionsDiv.style.maxHeight = '200px';
         solutionsDiv.style.overflowY = 'scroll';
-        solutionsDiv.style.border = '1px solid #ccc';
+        solutionsDiv.style.backgroundColor = '#393939';
         solutionsDiv.style.marginTop = '20px';
         solutionsDiv.style.padding = '10px';
+        solutionsDiv.style.width = '80%'; 
+        solutionsDiv.style.marginLeft = 'auto'; 
+        solutionsDiv.style.marginRight = 'auto'; 
         document.body.appendChild(solutionsDiv);
     }
-    solutionsDiv.innerHTML = ''; // Clear previous solutions
+    solutionsDiv.innerHTML = ''; 
 
     if (solutions && solutions.length > 0) {
         solutions.forEach(solution => {
             const solutionDiv = document.createElement('div');
-            solutionDiv.textContent = solution.toUpperCase(); // Convert to uppercase
-            solutionDiv.style.background = 'white'; // Set background to white
-            solutionDiv.style.color = 'black'; // Set text color to black
-            solutionDiv.style.fontWeight = 'bold'; // Make text bold
-            solutionDiv.style.border = '1px solid #ddd';
+            solutionDiv.textContent = solution.toUpperCase(); 
+            solutionDiv.style.background = 'white'; 
+            solutionDiv.style.color = 'black'; 
+            solutionDiv.style.fontWeight = 'bold'; 
             solutionDiv.style.margin = '5px';
+            solutionDiv.style.borderRadius = '5px';
             solutionDiv.style.padding = '5px';
-            solutionDiv.style.textAlign = 'center'; // Center text in the div
+            solutionDiv.style.textAlign = 'center'; 
             solutionsDiv.appendChild(solutionDiv);
         });
     } else {
