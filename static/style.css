@@ -89,24 +89,31 @@ input {
   }
   
   #keyboard-container {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 100px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
+    align-items: center; 
+    justify-content: flex-end;
+    padding: 20px 0; 
 }
 
 .keyboard-row {
     display: flex;
-    justify-content: center;
+    justify-content: center; 
+    margin: 5px 0; 
 }
 
 .keyboard-key {
-    background-color: #ddd; /* Change as per your theme */
+    background-color: #ddd;
     border: none;
     padding: 10px;
-    margin: 5px;
+    margin: 0 5px; 
     border-radius: 4px;
     text-transform: uppercase;
+    cursor: pointer; 
 }
 
 .keyboard-key.correct { background-color: #6aaa64; }

@@ -1,5 +1,6 @@
 from flask import Flask, session, jsonify, request, render_template
 import random
+from collections import Counter
 from wordleSolve import Trie, populate_trie, bfs_search
 
 app = Flask(__name__)
@@ -30,35 +31,30 @@ def start_game():
 
 def get_feedback(guess, solution):
     feedback = ["gray"] * len(guess)  # Default all to 'gray'
-    solution_letters_count = {}
+    solution_letters_count = Counter(
+        solution
+    )  # Use collections.Counter to simplify counting
 
-    # First, count occurrences of each letter in the solution
-    for letter in solution:
-        if letter in solution_letters_count:
-            solution_letters_count[letter] += 1
-        else:
-            solution_letters_count[letter] = 1
-
-    # First pass: Check for correct (green) letters
+    # First pass: Check for correct (green) letters and remove from count
     for i, letter in enumerate(guess):
         if letter == solution[i]:
             feedback[i] = "green"
             solution_letters_count[letter] -= 1
 
-    # Second pass: Check for present (yellow) letters
+    # Second pass: Check for present (yellow) letters and adjust the count accordingly
     for i, letter in enumerate(guess):
-        if (
-            feedback[i] == "gray"
-            and letter in solution_letters_count
-            and solution_letters_count[letter] > 0
-        ):
+        if feedback[i] == "gray" and solution_letters_count[letter] > 0:
             feedback[i] = "yellow"
             solution_letters_count[letter] -= 1
 
-    return feedback
+    # Third pass: Adjust feedback for gray letters only if they exceed the count in the solution
+    for i, letter in enumerate(guess):
+        if feedback[i] == "gray" and guess.count(letter) > solution.count(letter):
+            feedback[i] = (
+                "gray"  # Actually unnecessary since it's default, but here for clarity
+            )
 
-    feedback = get_feedback(guess, solution)
-    return jsonify(feedback)
+    return feedback
 
 
 @app.route("/check_guess", methods=["POST"])
@@ -75,12 +71,12 @@ def check_guess():
 
     solution = session.get("target_word")
     feedback = get_feedback(guess, solution)
-    print(f"Feedback: {feedback}")
     session["guesses"].append((guess, feedback))
 
-    # Retrieve and update the absent set
+    # Retrieve the current absent letters from the session
     absent = set(session.get("absent_letters", []))
     correct, present = {}, {}
+
     for i, f in enumerate(feedback):
         if f == "green":
             correct[i] = guess[i]
@@ -89,24 +85,25 @@ def check_guess():
                 present[guess[i]] = []
             present[guess[i]].append(i)
         elif f == "gray":
-            absent.add(guess[i])
+            # The letter should be added to absent only if it's not in the correct or present
+            if guess[i] not in correct.values() and not any(
+                guess[i] in pos for pos in present.values()
+            ):
+                absent.add(guess[i])
 
-    # Store the updated absent set
+    # Store the updated absent set, making sure to convert it back to a list
     session["absent_letters"] = list(absent)
 
-    print("Feedback for guess:", feedback)
-    print("Correct:", correct)
-    print("Present:", present)
-    print("Absent:", absent)
-
+    # Calculate the possible solutions with the current feedback
     possible_solutions = bfs_search(trie, correct, present, absent)
     print(f"Possible solutions: {possible_solutions}")
-    print("Possible solutions found:", possible_solutions)
 
+    # Check if the game is over
     game_over = all(f == "green" for f in feedback)
     if game_over:
+        # Clear the session variables for the next game
         session.pop("target_word", None)
-        session.pop("absent_letters", None)  # Also clear the absent letters
+        session.pop("absent_letters", None)
         return (
             jsonify(
                 {"feedback": feedback, "game_over": True, "message": "Congratulations!"}
@@ -114,6 +111,7 @@ def check_guess():
             200,
         )
 
+    # Return the feedback and possible solutions
     return (
         jsonify(
             {
