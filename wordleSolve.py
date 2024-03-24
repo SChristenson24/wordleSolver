@@ -28,27 +28,52 @@ def populate_trie(trie, dictionary_path):
 
 def bfs_search(trie, correct, present, absent):
     valid_words = []
-    queue = deque([(trie.root, "", [False] * 5)])
+    queue = deque(
+        [(trie.root, "", 0)]
+    )  # Changed from tracking used positions to just length of the word
 
     while queue:
-        node, word, used_positions = queue.popleft()
-        if len(word) == 5 and node.is_end_of_word:
-            if all(letter in word for letter in present.keys()):
-                valid_words.append(word)
+        node, word, length = queue.popleft()
+        if length == 5:
+            if node.is_end_of_word:
+                # Check all present letters are in the word, not necessarily at the positions marked as incorrect
+                if all(
+                    letter in word
+                    for letter in present
+                    if letter not in correct.values()
+                ):
+                    # Ensure correct letters are at their positions
+                    if all(word[pos] == letter for pos, letter in correct.items()):
+                        valid_words.append(word)
             continue
 
-        if len(word) < 5:
+        # Skip further processing if already at maximum length
+        if length >= 5:
+            continue
+
+        # If the next position is predefined with a correct letter, follow that path only
+        if length in correct:
+            letter = correct[length]
+            if letter in node.children:
+                next_node = node.children[letter]
+                queue.append((next_node, word + letter, length + 1))
+        else:
             for letter, next_node in node.children.items():
+                # Skip if letter is absent or it's a correct letter not at its predefined position
                 if letter in absent or (
-                    letter in present and len(word) in present[letter]
+                    length in correct and correct[length] != letter
                 ):
                     continue
-                new_used_positions = used_positions[:]
-                if len(word) in correct and correct[len(word)] == letter:
-                    new_used_positions[len(word)] = True
-                    queue.append((next_node, word + letter, new_used_positions))
-                elif len(word) not in correct:
-                    queue.append((next_node, word + letter, new_used_positions))
+
+                # Special handling for present but incorrectly positioned letters
+                if letter in present:
+                    incorrect_positions = present[letter]
+                    if (
+                        length not in incorrect_positions
+                    ):  # Ensure not adding a letter to its incorrect position
+                        queue.append((next_node, word + letter, length + 1))
+                else:
+                    queue.append((next_node, word + letter, length + 1))
 
     return valid_words
 
