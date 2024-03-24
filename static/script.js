@@ -47,33 +47,72 @@ function submitGuess() {
     })
     .then(response => {
         if (!response.ok) {
-            throw response;
+            return response.text().then(text => { throw new Error(text) });
         }
         return response.json();
     })
     .then(data => {
+        console.log("Received data:", data); // Log the entire response
+    
         if (data.error) {
             showError(data.error);
             shakeRow(activeRow);
             return;
         }
-
+    
         applyFeedback(activeRow, data.feedback);
+    
+        // Change this line to match the key sent from Flask
+        if (Array.isArray(data.possible_solutions)) {
+            displayPossibleSolutions(data.possible_solutions);
+        } else {
+            console.error("possible_solutions is not an array or is empty", data.possible_solutions);
+            displayPossibleSolutions(["No Possible Solutions!"]);
+        }
+    
         if (data.game_over) {
             alert(data.message || "Game Over!");
-            // Handle game over scenario
         } else {
             moveToNextRow();
         }
     })
-    .catch(errorResponse => {
-        errorResponse.json().then(err => {
-            console.error('Error:', err);
-            showError(err.error);
-            shakeRow(activeRow);
-        });
+    
+    .catch(error => {
+        console.error('Error:', error);
+        showError(error.toString());
+        shakeRow(activeRow);
     });
 }
+
+function displayPossibleSolutions(solutions) {
+    console.log('Displaying solutions:', solutions);
+    let solutionsDiv = document.getElementById('possibleSolutions');
+    if (!solutionsDiv) {
+        solutionsDiv = document.createElement('div');
+        solutionsDiv.id = 'possibleSolutions';
+        solutionsDiv.style.maxHeight = '200px';
+        solutionsDiv.style.overflowY = 'scroll';
+        solutionsDiv.style.border = '1px solid #ccc';
+        solutionsDiv.style.marginTop = '20px';
+        solutionsDiv.style.padding = '10px';
+        document.body.appendChild(solutionsDiv); // Append wherever it fits in your layout
+    }
+    solutionsDiv.innerHTML = ''; // Clear previous solutions
+
+    if (solutions && solutions.length > 0) {
+        solutions.forEach(solution => {
+            const solutionDiv = document.createElement('div');
+            solutionDiv.textContent = solution;
+            solutionDiv.style.border = '1px solid #ddd';
+            solutionDiv.style.margin = '5px';
+            solutionDiv.style.padding = '5px';
+            solutionsDiv.appendChild(solutionDiv);
+        });
+    } else {
+        solutionsDiv.innerHTML = '<div>No Possible Solutions!</div>'; // Show message when no solutions
+    }
+}
+
 
 function applyFeedback(row, feedback) {
     feedback.forEach((status, index) => {

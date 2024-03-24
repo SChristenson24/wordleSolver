@@ -1,6 +1,6 @@
 from flask import Flask, session, jsonify, request, render_template
 import random
-from wordleSolve import Trie, populate_trie
+from wordleSolve import Trie, populate_trie, bfs_search
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
@@ -22,36 +22,9 @@ with open(dictionary_path) as f:
 
 @app.route("/start_game", methods=["GET"])
 def start_game():
-    # Select a random word from the list of valid words
     session["target_word"] = random.choice(valid_words)
+    session["guesses"] = []  # Initialize or reset guesses history
     return jsonify({"message": "Game started"}), 200
-
-
-@app.route("/check_guess", methods=["POST"])
-def check_guess():
-    data = request.json
-    guess = data.get("guess", "").lower()
-
-    if "target_word" not in session:
-        return jsonify({"error": "Game not started"}), 400
-    if not guess or guess not in valid_words:
-        # If the guess is not in the dictionary
-        return jsonify({"error": "Word does not exist in dictionary"}), 400
-
-    solution = session.get("target_word")
-    feedback = get_feedback(guess, solution)
-
-    # Check if the game has been won
-    if all(f == "green" for f in feedback):
-        session.pop(
-            "target_word", None
-        )  # Remove the target word, effectively ending the game
-        return (
-            jsonify(feedback=feedback, game_over=True, message="Congratulations!"),
-            200,
-        )
-
-    return jsonify(feedback=feedback, game_over=False), 200
 
 
 def get_feedback(guess, solution):
@@ -85,6 +58,72 @@ def get_feedback(guess, solution):
 
     feedback = get_feedback(guess, solution)
     return jsonify(feedback)
+
+
+@app.route("/check_guess", methods=["POST"])
+def check_guess():
+    data = request.json
+    guess = data.get("guess", "").lower()
+    print(f"Received guess: {guess}")
+
+    if "target_word" not in session:
+        return jsonify({"error": "Game not started"}), 400
+
+    if not guess or guess not in valid_words:
+        # If the guess is not in the dictionary
+        return jsonify({"error": "Word does not exist in dictionary"}), 400
+
+    solution = session.get("target_word")
+    feedback = get_feedback(guess, solution)
+    print(f"Feedback: {feedback}")
+    session["guesses"].append((guess, feedback))  # Track guesses and their feedback
+
+    # Convert feedback into format expected by bfs_search
+    correct, present, absent = {}, {}, set()
+    for i, f in enumerate(feedback):
+        if f == "green":
+            correct[i] = guess[i]
+        elif f == "yellow":
+            if guess[i] not in present:
+                present[guess[i]] = []
+            present[guess[i]].append(i)
+        elif f == "gray":
+            absent.add(guess[i])
+
+    # Print the feedback processing results for debugging
+    print("Feedback for guess:", feedback)
+    print("Correct:", correct)
+    print("Present:", present)
+    print("Absent:", absent)
+
+    # Perform BFS search with the current state to find possible solutions
+    possible_solutions = bfs_search(trie, correct, present, absent)
+    print(f"Possible solutions: {possible_solutions}")
+
+    # Print the possible solutions found for debugging
+    print("Possible solutions found:", possible_solutions)
+
+    game_over = all(f == "green" for f in feedback)
+    if game_over:
+        session.pop("target_word", None)  # Game over
+        return (
+            jsonify(
+                {"feedback": feedback, "game_over": True, "message": "Congratulations!"}
+            ),
+            200,
+        )
+
+    # Include the possible solutions in the response
+    return (
+        jsonify(
+            {
+                "feedback": feedback,
+                "game_over": False,
+                "possible_solutions": possible_solutions,
+            }
+        ),
+        200,
+    )
 
 
 if __name__ == "__main__":
