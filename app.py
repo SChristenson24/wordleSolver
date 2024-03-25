@@ -65,6 +65,8 @@ def check_guess():
 
     if "target_word" not in session:
         return jsonify({"error": "Game not started"}), 400
+    
+    target_word = session.get("target_word")
 
     if not guess or guess not in valid_words:
         return jsonify({"error": "Word does not exist in dictionary"}), 400
@@ -101,27 +103,21 @@ def check_guess():
     # Check if the game is over
     game_over = all(f == "green" for f in feedback)
     if game_over:
-        # Clear the session variables for the next game
-        session.pop("target_word", None)
-        session.pop("absent_letters", None)
-        return (
-            jsonify(
-                {"feedback": feedback, "game_over": True, "message": "Congratulations!"}
-            ),
-            200,
-        )
-
-    # Return the feedback and possible solutions
-    return (
-        jsonify(
-            {
-                "feedback": feedback,
-                "game_over": False,
-                "possible_solutions": possible_solutions,
-            }
-        ),
-        200,
-    )
+        # Include the target_word in the JSON response
+        return jsonify({
+            "feedback": feedback, 
+            "game_over": True, 
+            "message": "Congratulations!",
+            "target_word": target_word  # Add this line
+        }), 200
+    else:
+        # Also include the target word in the response for a non-game-over scenario if needed
+        return jsonify({
+            "feedback": feedback, 
+            "game_over": False, 
+            "possible_solutions": possible_solutions,
+            "target_word": target_word  # Add this line
+        }), 200
 
 
 if __name__ == "__main__":
