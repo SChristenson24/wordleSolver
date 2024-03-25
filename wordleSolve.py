@@ -28,54 +28,62 @@ def populate_trie(trie, dictionary_path):
 
 def bfs_search(trie, correct, present, absent):
     valid_words = []
-    queue = deque(
-        [(trie.root, "", 0)]
-    )  # Changed from tracking used positions to just length of the word
+    queue = deque([(trie.root, "", 0)])  # Start with the Trie root, an empty word, and a length of 0.
 
     while queue:
         node, word, length = queue.popleft()
+
+        # When a word reaches the desired length of 5, check if it's valid.
         if length == 5:
-            if node.is_end_of_word:
-                # Check all present letters are in the word, not necessarily at the positions marked as incorrect
-                if all(
-                    letter in word
-                    for letter in present
-                    if letter not in correct.values()
-                ):
-                    # Ensure correct letters are at their positions
-                    if all(word[pos] == letter for pos, letter in correct.items()):
-                        valid_words.append(word)
+            if node.is_end_of_word and is_word_valid(word, correct, present, absent):
+                valid_words.append(word)
             continue
 
-        # Skip further processing if already at maximum length
         if length >= 5:
-            continue
+            continue  # Skip if the word is already at maximum length.
 
-        # If the next position is predefined with a correct letter, follow that path only
-        if length in correct:
-            letter = correct[length]
-            if letter in node.children:
-                next_node = node.children[letter]
-                queue.append((next_node, word + letter, length + 1))
-        else:
-            for letter, next_node in node.children.items():
-                # Skip if letter is absent or it's a correct letter not at its predefined position
-                if letter in absent or (
-                    length in correct and correct[length] != letter
-                ):
-                    continue
+        # Generate potential next steps.
+        for letter, next_node in node.children.items():
+            # Check if the next letter should be added to the word.
+            if should_skip_letter(letter, length, correct, present, absent, word):
+                continue
 
-                # Special handling for present but incorrectly positioned letters
-                if letter in present:
-                    incorrect_positions = present[letter]
-                    if (
-                        length not in incorrect_positions
-                    ):  # Ensure not adding a letter to its incorrect position
-                        queue.append((next_node, word + letter, length + 1))
-                else:
-                    queue.append((next_node, word + letter, length + 1))
+            queue.append((next_node, word + letter, length + 1))
 
     return valid_words
+
+def is_word_valid(word, correct, present, absent):
+    # Check correct letter positions
+    for pos, char in correct.items():
+        if word[pos] != char:
+            return False
+
+    letter_count = {char: word.count(char) for char in set(word)}
+
+    # Ensure letters marked as present but in wrong positions are correctly counted
+    for char, positions in present.items():
+        if letter_count.get(char, 0) < 1:
+            return False
+
+    # Absent letters should not appear outside allowed occurrences
+    for char in absent:
+        if char in letter_count and char not in present and char not in correct.values():
+            return False
+
+    return True
+
+def should_skip_letter(letter, position, correct, present, absent, word):
+    if letter in absent and letter not in present and letter not in correct.values():
+        return True
+
+    if position in correct and correct[position] != letter:
+        return True
+
+    # Incorrect positions for letters marked as present
+    if letter in present and position in present[letter]:
+        return True
+
+    return False
 
 
 def get_user_input(incorrect_positions, absent_letters):
