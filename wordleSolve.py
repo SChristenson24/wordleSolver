@@ -28,23 +28,19 @@ def populate_trie(trie, dictionary_path):
 
 def bfs_search(trie, correct, present, absent):
     valid_words = []
-    queue = deque([(trie.root, "", 0)])  # Start with the Trie root, an empty word, and a length of 0.
-
+    queue = deque([(trie.root, "", 0)])  
     while queue:
         node, word, length = queue.popleft()
 
-        # When a word reaches the desired length of 5, check if it's valid.
         if length == 5:
             if node.is_end_of_word and is_word_valid(word, correct, present, absent):
                 valid_words.append(word)
             continue
 
         if length >= 5:
-            continue  # Skip if the word is already at maximum length.
+            continue  
 
-        # Generate potential next steps.
         for letter, next_node in node.children.items():
-            # Check if the next letter should be added to the word.
             if should_skip_letter(letter, length, correct, present, absent, word):
                 continue
 
@@ -53,19 +49,16 @@ def bfs_search(trie, correct, present, absent):
     return valid_words
 
 def is_word_valid(word, correct, present, absent):
-    # Check correct letter positions
     for pos, char in correct.items():
         if word[pos] != char:
             return False
 
     letter_count = {char: word.count(char) for char in set(word)}
 
-    # Ensure letters marked as present but in wrong positions are correctly counted
     for char, positions in present.items():
         if letter_count.get(char, 0) < 1:
             return False
 
-    # Absent letters should not appear outside allowed occurrences
     for char in absent:
         if char in letter_count and char not in present and char not in correct.values():
             return False
@@ -79,7 +72,6 @@ def should_skip_letter(letter, position, correct, present, absent, word):
     if position in correct and correct[position] != letter:
         return True
 
-    # Incorrect positions for letters marked as present
     if letter in present and position in present[letter]:
         return True
 
@@ -98,7 +90,6 @@ def get_user_input(incorrect_positions, absent_letters):
     present = incorrect_positions
     absent = absent_letters
 
-    # Correct letters input
     correct_input = input(
         "Enter correct letters with their positions (e.g., 1a 3c), or type 'solved' to end: "
     )

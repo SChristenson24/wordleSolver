@@ -75,7 +75,7 @@ input {
 .wordleRow {
     display: flex;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 1px;
 }
 
 @keyframes shake {
@@ -170,8 +170,8 @@ input {
     padding: 20px;
     border-radius: 10px;
     text-align: center;
-    display: none; /* initially hidden */
-    z-index: 1000; /* Ensure it's above other content */
+    display: none; 
+    z-index: 1000; 
 }
 
 #win-message.active {

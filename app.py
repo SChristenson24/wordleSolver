@@ -16,7 +16,6 @@ def index():
     return render_template("index.html")
 
 
-# Assuming you have a list of valid target words loaded into 'valid_words'
 with open(dictionary_path) as f:
     valid_words = [word.strip() for word in f.readlines() if len(word.strip()) == 5]
 
@@ -25,33 +24,30 @@ with open(dictionary_path) as f:
 def start_game():
     session["target_word"] = random.choice(valid_words)
     session["guesses"] = []
-    session["absent_letters"] = []  # Store as an empty list instead of a set
+    session["absent_letters"] = []  
     return jsonify({"message": "Game started"}), 200
 
 
 def get_feedback(guess, solution):
-    feedback = ["gray"] * len(guess)  # Default all to 'gray'
+    feedback = ["gray"] * len(guess) 
     solution_letters_count = Counter(
         solution
-    )  # Use collections.Counter to simplify counting
+    )  
 
-    # First pass: Check for correct (green) letters and remove from count
     for i, letter in enumerate(guess):
         if letter == solution[i]:
             feedback[i] = "green"
             solution_letters_count[letter] -= 1
 
-    # Second pass: Check for present (yellow) letters and adjust the count accordingly
     for i, letter in enumerate(guess):
         if feedback[i] == "gray" and solution_letters_count[letter] > 0:
             feedback[i] = "yellow"
             solution_letters_count[letter] -= 1
 
-    # Third pass: Adjust feedback for gray letters only if they exceed the count in the solution
     for i, letter in enumerate(guess):
         if feedback[i] == "gray" and guess.count(letter) > solution.count(letter):
             feedback[i] = (
-                "gray"  # Actually unnecessary since it's default, but here for clarity
+                "gray"  
             )
 
     return feedback
@@ -75,7 +71,6 @@ def check_guess():
     feedback = get_feedback(guess, solution)
     session["guesses"].append((guess, feedback))
 
-    # Retrieve the current absent letters from the session
     absent = set(session.get("absent_letters", []))
     correct, present = {}, {}
 
@@ -87,36 +82,30 @@ def check_guess():
                 present[guess[i]] = []
             present[guess[i]].append(i)
         elif f == "gray":
-            # The letter should be added to absent only if it's not in the correct or present
             if guess[i] not in correct.values() and not any(
                 guess[i] in pos for pos in present.values()
             ):
                 absent.add(guess[i])
 
-    # Store the updated absent set, making sure to convert it back to a list
     session["absent_letters"] = list(absent)
 
-    # Calculate the possible solutions with the current feedback
     possible_solutions = bfs_search(trie, correct, present, absent)
     print(f"Possible solutions: {possible_solutions}")
 
-    # Check if the game is over
     game_over = all(f == "green" for f in feedback)
     if game_over:
-        # Include the target_word in the JSON response
         return jsonify({
             "feedback": feedback, 
             "game_over": True, 
             "message": "Congratulations!",
-            "target_word": target_word  # Add this line
+            "target_word": target_word 
         }), 200
     else:
-        # Also include the target word in the response for a non-game-over scenario if needed
         return jsonify({
             "feedback": feedback, 
             "game_over": False, 
             "possible_solutions": possible_solutions,
-            "target_word": target_word  # Add this line
+            "target_word": target_word  
         }), 200
 
 
